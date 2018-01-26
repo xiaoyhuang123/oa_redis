@@ -1,0 +1,185 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title> 丰台运用车间OA管理系统</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link href="assets/css/dpl-min.css" rel="stylesheet" type="text/css" />
+    <link href="assets/css/bui-min.css" rel="stylesheet" type="text/css" />
+    <link href="assets/css/main-min.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+
+<div class="header">
+
+    <div class="dl-title">
+        <a href="" title="文档库地址" target="_blank"><!-- 仅仅为了提供文档的快速入口，项目中请删除链接 -->
+            <span class="lp-title-port">丰台运用车间</span><span class="dl-title-text">OA管理系统</span>
+        </a>
+    </div>
+    <div class="dl-log">欢迎您，<span id="usname" class="dl-log-user"></span><a href="login.html" title="退出系统" class="dl-log-quit">[退出]</a>
+    </div>
+</div>
+<div class="content">
+    <div class="dl-main-nav">
+        <div class="dl-inform"><div class="dl-inform-title">贴心小秘书<s class="dl-inform-icon dl-up"></s></div></div>
+        <ul id="J_Nav"  class="nav-list ks-clear">
+            <li class="nav-item dl-selected"><div class="nav-item-inner nav-home">首页</div></li>
+            <li class="nav-item"><div class="nav-item-inner nav-order">工作任务</div></li>
+            <!--li class="nav-item"><div class="nav-item-inner nav-inventory">搜索页</div></li-->
+            <li class="nav-item"><div class="nav-item-inner nav-supplier">个人中心</div></li>
+            <!--li class="nav-item"><div class="nav-item-inner nav-marketing">图表</div></li-->
+        </ul>
+    </div>
+    <ul id="J_NavContent" class="dl-tab-conten">
+
+    </ul>
+</div>
+<script type="text/javascript" src="assets/js/jquery-1.8.1.min.js"></script>
+<script type="text/javascript" src="assets/js/bui.js"></script>
+<script type="text/javascript" src="assets/js/config.js"></script>
+
+<script>
+    BUI.use('common/main',function(){
+        $(document).ready(function () {
+                    $.ajax({
+                        type: "POST",
+                        url: "/getUser",
+                        dataType: "json",
+                        async:true,
+                        success: function (result) {   //
+                            var na= result.userName;
+                            $('#usname').html(na);
+                        }
+                    });
+                }
+
+        );
+
+        var config = [{
+            id:'menu',
+            homePage : 'code',
+            menu:[{
+                text:'首页',
+                items:[
+                    {id:'code',text:'丰台运用车间OA管理系统',href:'index.html',closeable : false}
+                ]
+            },{
+                text:'车队管理',
+                items:[
+                    {id:'operation',text:'车队查询',href:'ft_chedui/cheduiSearch_cj.html'},
+                    {id:'quick',text:'添加车队',href:'ft_chedui/cheduiEdit_cj.html'}
+                ]
+            },{
+                text:'员工管理',
+                items:[
+                    {id:'resource',text:'员工查询',href:'ft_worker/workerSearch.html'},
+                    {id:'loader',text:'添加员工',href:'ft_worker/workerEdit.html'}
+                ]
+            }]
+        },{
+            id:'form',
+            homePage : 'code1',
+            menu:[{
+                text:'我的待办',
+                items:[
+                    /*{id:'example',text:'待签收工作',href:'ft_mytask/myTaskUnResponse.html',closeable : false},
+                    {id:'code',text:'待完成工作',href:'ft_mytask/myTaskUndo.html'},*/
+                    {id:'code1',text:'我的待办',href:'ft_mytask/undoTask.html',closeable : false}
+                ]
+            },{
+                text:'工作任务',
+                items:[
+                    {id:'form',text:'任务查询',href:'ft_mytask/myTaskSearch.html',closeable : false},
+                    {id:'example',text:'工作任务发布',href:'ft_task/taskEdit.html'}
+                ]
+            },{
+                text:'统计汇总',
+                items:[
+                    {id:'stasticOverView',text:'汇总一览',href:'ft_mytask/myTaskOverView_cj.html',closeable : false},
+                    {id:'stastics',text:'汇总查询',href:'ft_mytask/myTaskStasticsSearch_cj.html'}
+                ]
+            }]
+        },/*{
+         id:'search',
+         menu:[{
+         text:'汇总与统计',
+         items:[
+         {id:'code',text:'搜索页面代码',href:'search/code.html'},
+         {id:'example',text:'搜索页面示例',href:'workshop/workshopSearch.html'},
+         {id:'example-dialog',text:'搜索页面编辑示例',href:'search/example-dialog.html'},
+         {id:'introduce',text:'搜索页面简介',href:'search/introduce.html'},
+         {id:'config',text:'搜索配置',href:'search/config.html'}
+         ]
+         }]
+         },*/{
+            id:'detail',
+            menu:[{
+                text:'个人中心',
+                homePage : 'detail',
+                items:[
+                    /*{id:'detail',text:'个人信息编辑',href:'ft_worker/workerModify.html',closeable : false},*/
+                    {id:'detail',text:'修改密码',href:'modifyPwd.html',closeable : false}
+
+                ]
+            }]
+        },/*{
+         id : 'chart',
+         menu : [{
+         text : '图表',
+         items:[
+         {id:'code',text:'引入代码',href:'chart/code.html'},
+         {id:'line',text:'折线图',href:'chart/line.html'},
+         {id:'area',text:'区域图',href:'chart/area.html'},
+         {id:'column',text:'柱状图',href:'chart/column.html'},
+         {id:'pie',text:'饼图',href:'chart/pie.html'},
+         {id:'radar',text:'雷达图',href:'chart/radar.html'}
+         ]
+         }]
+         },{
+         id : 'chart',
+         menu : [{
+         text : '部门',
+         items:[
+         {id:'code',text:'详情',href:'workshop/workshopDetail.html'},
+         {id:'radar',text:'查询',href:'workshop/workshopSearch.html'}
+         ]
+         }]
+         }*/];
+        new PageUtil.MainPage({
+            modulesConfig : config
+        });
+    });
+</script>
+
+<div class="demo-content">
+
+    <!--script type="text/javascript" src="../assets/js/jquery-1.8.1.min.js"></script-->
+    <script src="assets/bui/seajs/2.3.0/sea.js"></script>
+    <script src="assets/bui/bui/1.1.21/config.js"></script>
+
+    <!-- script start -->
+    <script type="text/javascript">
+        BUI.use('bui/overlay',function(overlay){
+            $(document).ready(function () {
+                        $.ajax({
+                            type: "POST",
+                            url: "task/countAll",
+                            dataType: "json",
+                            async:true,
+                            success: function (result) {   //
+                                var notComplete=0;
+                                notComplete=result.notComplete;
+                                if(notComplete>1){
+                                    BUI.Message.Alert('当前您存在待签收或待完成任务，请注意查收!');
+                                }
+                            }
+                        });
+                    }
+            );
+
+        });
+    </script>
+    <!-- script end -->
+</div>
+</body>
+</html>

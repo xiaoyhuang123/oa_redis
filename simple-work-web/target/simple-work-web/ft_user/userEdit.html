@@ -1,0 +1,254 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title> 编辑员工信息</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link href="../assets/css/dpl-min.css" rel="stylesheet" type="text/css" />
+    <link href="../assets/css/bui-min.css" rel="stylesheet" type="text/css" />
+    <link href="../assets/css/page-min.css" rel="stylesheet" type="text/css" />
+    <link href="../assets/bui/bui/1.1.21/css/bs3/dpl.css" rel="stylesheet"/>
+    <link href="../assets/bui/bui/1.1.21/css/bs3/bui.css" rel="stylesheet"/>
+    <style type="text/css">
+        code {
+            padding: 0px 4px;
+            color: #d14;
+            background-color: #f7f7f9;
+            border: 1px solid #e1e1e8;
+        }
+    </style>
+</head>
+<body >
+
+<div class="container">
+    <form id ="J_Form" class="form-horizontal" action="../../user/edit">
+        <h3>基本信息</h3>
+        <input name="id" id="id" type="text" style="visibility: hidden" class="control-text">
+        <input name="jid" id="jid" type="text" style="visibility: hidden" class="control-text">
+        <input name="did" id="did" type="text" style="visibility: hidden" class="control-text">
+        <input name="wid" id="wid" type="text" style="visibility: hidden" class="control-text">
+
+        <div class="row span24">
+            <label class="control-label"><s>*</s>用户名：</label>
+            <div class="controls">
+                <input id="userName" name="userName" type="text" class="input-large"
+                       data-rules="{required:true,sid:7}" runat="Server" >
+            </div>
+        </div>
+
+        <div class="row span24">
+            <label class="control-label"><s>*</s>角色类型：</label>
+            <div class="controls">
+                <div id="s1">
+                    <input type="hidden" id="roleType" value="4" name="roleType">
+                </div>
+            </div>
+        </div>
+
+        <div class="row span24">
+            <div class="control-group span24">
+                <label class="control-label">
+                    <s></s>所属信息：</label>
+                <div class="controls">
+                    <div id="cj">
+                        <input type="hidden" id="chejianId" value="" name="chejianId">
+                    </div>
+                </div>
+                <div class="controls">
+                    <div id="cd">
+                        <input type="hidden" id="cheduiId" value="" name="cheduiId">
+                    </div>
+                </div>
+                <div class="controls">
+                    <div id="wk">
+                        <input type="hidden" id="workerId" value="" name="workerId">
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+        <div class="row">
+            <div class="form-actions offset3">
+                <button type="submit" class="button button-primary">保存</button>
+                <button type="reset" class="button">重置</button>
+            </div>
+        </div>
+    </form>
+
+    <script type="text/javascript" src="../assets/js/jquery-1.8.1.min.js"></script>
+    <script type="text/javascript" src="../assets/js/bui-min.js"></script>
+    <script src="../assets/bui/seajs/2.3.0/sea.js"></script>
+    <script src="../assets/bui/bui/1.1.21/config.js"></script>
+
+    <script type="text/javascript" src="../assets/js/config-min.js"></script>
+    <script type="text/javascript">
+        BUI.use('common/page');
+    </script>
+
+    <script type="text/javascript">
+
+        BUI.use(['bui/select','bui/data'],function(Select,Data){
+
+            var store = new Data.Store({
+                        url : '../common/selectChejian',
+                        autoLoad : true
+                    }),
+                    select = new Select.Select({
+                        render:'#cj',
+                        valueField:'#chejianId',
+                        multipleSelect : false,
+                        store : store
+                    });
+            select.render();
+            $('#chejianId').on('change', function(ev){
+                var select =$('#chejianId');
+                var cjid=select.val();
+
+                $('#cd').empty();
+                $('#wk').empty();
+                $("#cd").append(' <input type="hidden" id="cheduiId"  name="cheduiId" value="">');
+                if(select.val()==""){
+                    $('#cd').empty();
+                    $('#wk').empty();
+                    $("#cd").append(' <input type="hidden" id="cheduiId"  name="cheduiId">');
+                }
+                else{
+
+                    var store = new Data.Store({
+                                url : '../common/selectChedui?chejianId='+cjid,
+                                autoLoad : true
+                            }),
+                            select = new Select.Select({
+                                render:'#cd',
+                                valueField:'#cheduiId',
+                                multipleSelect : false,
+                                store : store
+                            });
+                    select.render();
+
+                    var cdSelect =$('#cheduiId');
+                    var cdid=cdSelect.val();
+                    var store1 = new Data.Store({
+                                url : '../worker/select?chejianId='+cjid+'&cheduiId='+cdid,
+                                autoLoad : true
+                            }),
+                            select = new Select.Select({
+                                render:'#wk',
+                                valueField:'#workerId',
+                                multipleSelect : false,
+                                store : store1
+                            });
+                    select.render();
+
+
+
+                    $('#cheduiId').on('change', function(ev){
+                        var cjSelect =$('#chejianId');
+                        var cdSelect =$('#cheduiId');
+                        var cjid=cjSelect.val();
+
+                        var cdid=cdSelect.val();
+
+                        $('#wk').empty();
+                        $("#wk").append(' <input type="hidden" id="workerId"  name="workerId">');
+                        /*if(cdSelect.val()==""){
+                         $('#wk').empty();
+                         $("#wk").append(' <input type="hidden" id="workerId"  name="workerId">');
+                         }
+                         else*/{
+
+                            var store = new Data.Store({
+                                        url : '../worker/select?chejianId='+cjid+'&cheduiId='+cdid,
+                                        autoLoad : true
+                                    }),
+                                    select = new Select.Select({
+                                        render:'#wk',
+                                        valueField:'#workerId',
+                                        multipleSelect : false,
+                                        store : store
+                                    });
+                            select.render();
+                        }
+                    });
+
+                }
+            });
+
+        });
+
+            function GetQueryString(name) {
+                var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+                var r = window.location.search.substr(1).match(reg);
+                if (r != null) return (r[2]);
+                return null;
+            }
+
+            BUI.use(['bui/select', 'bui/data'], function (Select, Data) {
+
+                var store = new Data.Store({
+                            url: '../common/selectRole?addDefault=0',
+                            autoLoad: true
+                        }),
+                        select = new Select.Select({
+                            render: '#s1',
+                            valueField: '#roleType',
+                            multipleSelect: false,
+                            store: store
+                        });
+                select.render();
+
+            });
+
+
+            BUI.use('bui/form', function (Form) {
+                var id = GetQueryString("id");
+                if (null != id && '' != id) {
+                    $.ajax({
+                        url: '../user/detail',
+                        dataType: 'json',
+                        data: {id: id},
+                        success: function (data) {
+                            if (data.successed) { //获取数据成功
+
+                                var wo = data.result;
+                                $('#id').val(id);
+                                $('#userName').val(wo.userName);
+                                $('#roleType').val(wo.role);
+
+                                $('#chejianId').val(wo.chejianId);
+                                $('#cheduiId').val(wo.cheduiId);
+                                $('#workerId').val(wo.workerId);
+                            } else { //删除失败
+                                BUI.Message.Alert(data.msg);
+                            }
+                        }
+                    });
+                }
+
+                var form = new Form.HForm({
+                    srcNode: '#J_Form'
+                }).render();
+
+            });
+
+            BUI.use('bui/form', function (Form) {
+                new Form.HForm({
+                    srcNode: '#J_Form',
+                    submitType: 'ajax',
+                    callback: function (data) {
+                        if (data.successed) {
+                            BUI.Message.Alert('操作成功！');
+                        }
+                        else {
+                            BUI.Message.Alert(data.msg);
+                        }
+                    }
+                }).render();
+            });
+
+    </script>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,505 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>查询员工信息</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link href="../assets/css/dpl-min.css" rel="stylesheet" type="text/css" />
+    <link href="../assets/css/bui-min.css" rel="stylesheet" type="text/css" />
+    <link href="../assets/css/page-min.css" rel="stylesheet" type="text/css" />
+    <style>
+        .bui-select-list{
+            overflow: auto;
+            overflow-x: hidden;
+            max-height: 150px;
+            _height : 150px;
+        }
+        </style>
+</head>
+<body>
+
+<div class="container">
+
+    <form id="searchForm" class="form-horizontal">
+        <div class="row span24">
+            <div class="control-group span24">
+                <label class="control-label">
+                    <s></s>车间-车队-员工：</label>
+                <div class="controls">
+                        <div id="cj">
+                            <input type="hidden" id="chejianId" value="" name="chejianId">
+                        </div>
+                    </div>
+                    <div class="controls">
+                        <div id="cd">
+                            <input type="hidden" id="cheduiId" value="" name="cheduiId">
+                        </div>
+                    </div>
+                    <div class="controls">
+                        <div id="wk">
+                            <input type="hidden" id="workerId" value="" name="workerId">
+                        </div>
+
+                    </div>
+                    <!--div class="bui-form-group-select" data-url="../common/selectChedui">
+                        <select class="input-normal" name="chejianId" value="">
+                            <option value="">请选择车间</option>
+                        </select>
+                        <span>-</span>
+                        <select class="input-normal"  name="cheduiId" value="">
+                            <option value="">请选择车队</option>
+                        </select>
+                        <span>-</span>
+                        <select class="input-normal"  name="groupId" value="">
+                            <option value="">请选择指导组</option>
+                        </select>
+                    </div-->
+            </div>
+        </div>
+        <div class="row span24">
+            <div class="control-group span8">
+                <label class="control-label">政治面貌：</label>
+                <div class="controls">
+                    <div id="zzmm">
+                        <input type="hidden" id="politicId" value="" name="politicId" value="">
+                    </div>
+                </div>
+            </div>
+            <div class="control-group span8">
+                <label class="control-label">学历：</label>
+                <div class="controls">
+                    <div id="xl">
+                        <input type="hidden" id="degreeId" value="" name="degreeId">
+                    </div>
+                </div>
+            </div>
+            <div class="control-group span8">
+                <label class="control-label">工作职称：</label>
+                <div class="controls">
+                    <div id="zc">
+                        <input type="hidden" id="positionTitleId" value="" name="positionTitleId">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row span24">
+            <div class="control-group span8">
+                <label class="control-label">工作职务：</label>
+                <div class="controls">
+                    <div id="zw">
+                        <input type="hidden" id="zhiwuId" value="" name="zhiwuId">
+                    </div>
+                </div>
+            </div>
+            <div class="control-group span8">
+                <label class="control-label"><s>*</s>籍贯：</label>
+                <div class="controls">
+                    <div id="jg">
+                        <input type="hidden" id="province" value="" name="province">
+                    </div>
+                </div>
+            </div>
+            <div class="control-group span8">
+                <label class="control-label"><s>*</s>特征描述：</label>
+                <div class="controls">
+                    <div id="tzms">
+                        <input type="hidden" id="feature" value="" name="feature">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row span24">
+            <div class="control-group span8">
+                <label class="control-label">员工姓名：</label>
+                <div class="controls">
+                    <input type="text" class="control-text" name="workerName">
+                </div>
+            </div>
+            <div class="control-group span10">
+                <label class="control-label"><s>*</s>入职时间：</label>
+                <div class="controls">
+                    <input type="text" class=" calendar"  id="joinTimeStart" name="joinTimeStart">
+                    <span> - </span>
+                    <input id="joinTimeEnd" name="joinTimeEnd" type="text"  class=" calendar">
+                </div>
+                <div class=" offset2">
+                    <button  type="button" id="btnSearch" class="button button-primary">搜索</button>
+                </div>
+            </div>
+        </div>
+    </form>
+    <div class="row"></div>
+    <div class="search-grid-container">
+        <div id="grid"></div>
+    </div>
+
+</div>
+<script type="text/javascript" src="../assets/js/jquery-1.8.1.min.js"></script>
+<script type="text/javascript" src="../assets/js/bui-min.js"></script>
+<script type="text/javascript" src="../assets/js/config-min.js"></script>
+<script type="text/javascript">
+
+    BUI.use(['bui/select','bui/data'],function(Select,Data){
+
+        var store = new Data.Store({
+                    url : '../common/selectChejian',
+                    autoLoad : true
+                }),
+                select = new Select.Select({
+                    render:'#cj',
+                    valueField:'#chejianId',
+                    multipleSelect : false,
+                    store : store
+                });
+        select.render();
+
+        $('#chejianId').on('change', function(ev){
+            var select =$('#chejianId');
+            var cjid=select.val();
+
+            $('#cd').empty();
+            $('#wk').empty();
+            $("#cd").append(' <input type="hidden" id="cheduiId"  name="cheduiId" value="">');
+            if(select.val()==""){
+                $('#cd').empty();
+                $('#wk').empty();
+                $("#cd").append(' <input type="hidden" id="cheduiId"  name="cheduiId">');
+            }
+            else{
+
+                var store = new Data.Store({
+                            url : '../common/selectChedui?chejianId='+cjid,
+                            autoLoad : true
+                        }),
+                        select = new Select.Select({
+                            render:'#cd',
+                            valueField:'#cheduiId',
+                            multipleSelect : false,
+                            store : store
+                        });
+                select.render();
+
+                $('#cheduiId').on('change', function(ev){
+                    var cjSelect =$('#chejianId');
+                    var cdSelect =$('#cheduiId');
+                    var cjid=cjSelect.val();
+
+                    var cdid=cdSelect.val();
+
+                    $('#wk').empty();
+                    $("#wk").append(' <input type="hidden" id="workerId"  name="workerId">');
+                    if(cdSelect.val()==""){
+                        $('#wk').empty();
+                        $("#wk").append(' <input type="hidden" id="workerId"  name="workerId">');
+                    }
+                    else{
+
+                        var store = new Data.Store({
+                                    url : '../worker/select?chejianId='+cjid+'&cheduiId='+cdid,
+                                    autoLoad : true
+                                }),
+                                select = new Select.Select({
+                                    render:'#wk',
+                                    valueField:'#workerId',
+                                    multipleSelect : false,
+                                    store : store
+                                });
+                        select.render();
+                    }
+                });
+
+            }
+        });
+
+    });
+
+    BUI.use(['bui/select','bui/data'],function(Select,Data){
+
+        var store = new Data.Store({
+                    url : '../degree/select',
+                    autoLoad : true
+                }),
+                select = new Select.Select({
+                    render:'#xl',
+                    valueField:'#degreeId',
+                    multipleSelect : false,
+                    store : store
+                });
+        select.render();
+
+    });
+    BUI.use(['bui/select','bui/data'],function(Select,Data){
+
+        var store = new Data.Store({
+                    url : '../politic/select',
+                    autoLoad : true
+                }),
+                select = new Select.Select({
+                    render:'#zzmm',
+                    valueField:'#politicId',
+                    multipleSelect : false,
+                    store : store
+                });
+        select.render();
+
+    });
+    BUI.use(['bui/select','bui/data'],function(Select,Data){
+
+        var store = new Data.Store({
+                    url : '../positionTitle/select',
+                    autoLoad : true
+                }),
+                select = new Select.Select({
+                    render:'#zc',
+                    valueField:'#positionTitleId',
+                    multipleSelect : false,
+                    store : store
+                });
+        select.render();
+
+    });
+
+    BUI.use(['bui/select','bui/data'],function(Select,Data){
+
+        var store = new Data.Store({
+                    url : '../zhiwu/select',
+                    autoLoad : true
+                }),
+                select = new Select.Select({
+                    render:'#zw',
+                    valueField:'#zhiwuId',
+                    multipleSelect : false,
+                    store : store
+                });
+        select.render();
+
+    });
+
+    BUI.use('bui/select',function(Select){
+
+        var items = [
+                    {text:'请选择',value:''},
+                    {text:'北京市',value:'北京市'},
+                    {text:'天津市',value:'天津市'},
+                    {text:'天津市',value:'天津市'},
+                    {text:'重庆市',value:'重庆市'},
+                    {text:'河北省',value:'河北省'},
+                    {text:'河南省',value:'河南省'},
+                    {text:'云南省',value:'云南省'},
+                    {text:'辽宁省',value:'辽宁省'},
+                    {text:'湖南省',value:'湖南省'},
+                    {text:'安徽省',value:'安徽省'},
+                    {text:'山东省',value:'山东省'},
+                    {text:'江苏省',value:'江苏省'},
+                    {text:'浙江省',value:'浙江省'},
+                    {text:'江西省',value:'江西省'},
+                    {text:'湖北省',value:'湖北省'},
+                    {text:'甘肃省',value:'甘肃省'},
+                    {text:'山西省',value:'山西省'},
+                    {text:'陕西省',value:'陕西省'},
+                    {text:'吉林省',value:'吉林省'},
+                    {text:'福建省',value:'福建省'},
+                    {text:'贵州省',value:'贵州省'},
+                    {text:'广东省',value:'广东省'},
+                    {text:'青海省',value:'青海省'},
+                    {text:'四川省',value:'四川省'},
+                    {text:'海南省',value:'海南省'},
+                    {text:'台湾省',value:'台湾省'},
+                    {text:'黑龙江省',value:'黑龙江省'},
+                    {text:'西藏自治区',value:'西藏自治区'},
+                    {text:'内蒙古自治区',value:'内蒙古自治区'},
+                    {text:'广西壮族自治区',value:'广西壮族自治区'},
+                    {text:'宁夏回族自治区',value:'宁夏回族自治区'},
+                    {text:'新疆维吾尔族自治区',value:'新疆维吾尔族自治区'},
+                    {text:'香港特别行政区',value:'香港特别行政区'},
+                    {text:'澳门特别行政区',value:'澳门特别行政区'}
+                ],
+                select = new Select.Select({
+                    render:'#jg',
+                    valueField:'#province',
+                    items:items
+                });
+        select.render();
+        select.on('change', function(ev){
+           // alert(ev.item);
+        });
+
+    });
+
+    BUI.use('bui/select',function(Select){
+
+        var items = [
+                    {text:'请选择',value:''},
+                    {text:'拿本未单独',value:'拿本未单独'},
+                    {text:'技术比武',value:'技术比武'}
+                ],
+                select = new Select.Select({
+                    render:'#tzms',
+                    valueField:'#feature',
+                    items:items
+                });
+        select.render();
+        select.on('change', function(ev){
+            //alert(ev.item);
+        });
+
+    });
+    /*
+    BUI.use(['bui/select','bui/data'],function(Select,Data){
+
+        var store = new Data.Store({
+                    url : '../politic/select',
+                    autoLoad : true
+                }),
+                select = new Select.Select({
+                    render:'#zzmm',
+                    valueField:'#politicId',
+                    multipleSelect : false,
+                    store : store
+                });
+        select.render();
+
+    });
+    BUI.use(['bui/select','bui/data'],function(Select,Data){
+
+        var store = new Data.Store({
+                    url : '../degree/select',
+                    autoLoad : true
+                }),
+                select = new Select.Select({
+                    render:'#xl',
+                    valueField:'#degreeId',
+                    multipleSelect : false,
+                    store : store
+                });
+        select.render();
+
+    });
+
+    BUI.use(['bui/select','bui/data'],function(Select,Data){
+
+        var store = new Data.Store({
+                    url : '../zhiwu/select',
+                    autoLoad : true
+                }),
+                select = new Select.Select({
+                    render:'#s1',
+                    valueField:'#zhiwuId',
+                    multipleSelect : false,
+                    store : store
+                });
+        select.render();
+
+    });
+
+    BUI.use(['bui/select','bui/data'],function(Select,Data){
+
+        var store = new Data.Store({
+                    url : '../positionTitle/select',
+                    autoLoad : true
+                }),
+                select = new Select.Select({
+                    render:'#zc',
+                    valueField:'#positionTitleId',
+                    multipleSelect : false,
+                    store : store
+                });
+        select.render();
+
+    });
+
+*/
+
+
+    BUI.use(['common/search','common/page'],function (Search) {
+
+        var enumObj = {"1":"男","0":"女"},
+                columns = [
+                    {title:'工号',dataIndex:'workNumber',width:'10%', elCls : 'center'},
+                    {title:'姓名',dataIndex:'name',width:'10%', elCls : 'center'},
+                    {title:'籍贯',dataIndex:'province',width:'5%', elCls : 'center'},
+                    {title:'特征描述',dataIndex:'feature',width:'10%', elCls : 'center'},
+                    {title:'入职时间',dataIndex:'joinTime',width:'15%', elCls : 'center',renderer:BUI.Grid.Format.dateRenderer},
+                    {title:'职务',dataIndex:'zhiwuName',width:'10%', elCls : 'center'},
+                    {title:'所属车间',dataIndex:'chejianName',width:'10%', elCls : 'center'},
+                    {title:'所属车队',dataIndex:'cheduiName',width:'10%', elCls : 'center'},
+                    {title:'指导组',dataIndex:'groupName',width:'10%', elCls : 'center'},
+                    {title:'操作',dataIndex:'',width:'10%', elCls : 'center',renderer : function(value,obj){
+                        var detailStr =  Search.createLink({ //链接使用 此方式
+                                    id : 'edit' + obj.id,
+                                    title : '员工信息详情',
+                                    text : '详情',
+                                    href : '../ft_worker/workerDetail.html?id='+obj.id
+                                }),
+                                editStr =  Search.createLink({ //链接使用 此方式
+                                    id : 'edit' + obj.id,
+                                    title : '编辑员工信息',
+                                    text : '编辑',
+                                    href : '../ft_worker/workerEdit.html?id='+obj.id
+                                }),
+                                delStr = '<span class="grid-command btn-del" title="删除员工信息">删除</span>';
+                        //页面操作不需要使用Search.createLink
+                        return detailStr +'&nbsp;&nbsp'+ editStr + '&nbsp;&nbsp'+delStr;
+                    }}
+                ],
+                store = Search.createStore('../../worker/selectByParams'),
+                gridCfg = Search.createGridCfg(columns,{
+                    emptyDataTpl : '<div class="centered"><h2>无记录</h2></div>',
+                    tbar : {
+                        items : [
+                            {text : '新建',btnCls : 'button button-success',handler:function(){window.location.href="workerEdit.html"; }},
+                            {text : '删除',btnCls : 'button button-danger',handler : delFunction}
+                        ]
+                    },
+                    plugins : [BUI.Grid.Plugins.CheckSelection,BUI.Grid.Plugins.RowNumber] // 插件形式引入多选表格
+                });
+
+        var  search = new Search({
+                    store : store,
+                    gridCfg : gridCfg
+                }),
+                grid = search.get('grid');
+        //删除操作
+        function delFunction(){
+            var selections = grid.getSelection();
+            delItems(selections);
+        }
+
+        function delItems(items){
+            var ids = [];
+            BUI.each(items,function(item){
+                ids.push(item.id);
+            });
+
+            if(ids.length){
+                BUI.Message.Confirm('确认要删除选中的记录么？',function(){
+                    $.ajax({
+                        url : '../../worker/delete',
+                        dataType : 'json',
+                        traditional: true,
+                        data : {ids : ids},
+                        success : function(data){
+                            if(data.successed){ //删除成功
+                                search.load();
+                            }else{ //删除失败
+                                BUI.Message.Alert('删除失败！');
+                            }
+                        }
+                    });
+                },'question');
+            }
+        }
+
+        //监听事件，删除一条记录
+        grid.on('cellclick',function(ev){
+            var sender = $(ev.domTarget); //点击的Dom
+            if(sender.hasClass('btn-del')){
+                var record = ev.record;
+                delItems([record]);
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

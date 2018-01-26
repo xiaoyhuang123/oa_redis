@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/simple-work-client/simple-work-client.iml" filepath="$PROJECT_DIR$/simple-work-client/simple-work-client.iml" />
+      <module fileurl="file://$PROJECT_DIR$/simple-work-common/simple-work-common.iml" filepath="$PROJECT_DIR$/simple-work-common/simple-work-common.iml" />
+      <module fileurl="file://$PROJECT_DIR$/simple-work-dao/simple-work-dao.iml" filepath="$PROJECT_DIR$/simple-work-dao/simple-work-dao.iml" />
+      <module fileurl="file://$PROJECT_DIR$/simple-work-model/simple-work-model.iml" filepath="$PROJECT_DIR$/simple-work-model/simple-work-model.iml" />
+      <module fileurl="file://$PROJECT_DIR$/simple-work-service/simple-work-service.iml" filepath="$PROJECT_DIR$/simple-work-service/simple-work-service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/simple-work-web/simple-work-web.iml" filepath="$PROJECT_DIR$/simple-work-web/simple-work-web.iml" />
+      <module fileurl="file://$PROJECT_DIR$/simple_work_engine.iml" filepath="$PROJECT_DIR$/simple_work_engine.iml" />
+    </modules>
+  </component>
+</project>

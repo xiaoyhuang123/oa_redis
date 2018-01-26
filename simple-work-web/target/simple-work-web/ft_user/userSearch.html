@@ -1,0 +1,176 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>用户信息管理</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link href="../assets/css/dpl-min.css" rel="stylesheet" type="text/css" />
+    <link href="../assets/css/bui-min.css" rel="stylesheet" type="text/css" />
+    <link href="../assets/css/page-min.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+
+<div class="container">
+
+    <form id="searchForm" class="form-horizontal">
+        <div class="row">
+            <div class="control-group span12">
+                <label class="control-label">用户名：</label>
+                <div class="controls">
+                    <input type="text" class="control-text" id="userName" name="userName">
+                </div>
+            </div>
+            <div class="control-group span12">
+                <label class="control-label">角色类型：</label>
+                <div class="controls">
+                    <div id="s1">
+                        <input type="hidden" id="userType" value="" name="userType">
+                    </div>
+                </div>
+            </div>
+            <div class="span3 offset2">
+                <button  type="button" id="btnSearch" class="button button-primary">搜索</button>
+            </div>
+        </div>
+    </form>
+
+    <div class="search-grid-container">
+        <div id="grid"></div>
+    </div>
+</div>
+<script type="text/javascript" src="../assets/js/jquery-1.8.1.min.js"></script>
+<script type="text/javascript" src="../assets/js/bui-min.js"></script>
+<script type="text/javascript" src="../assets/js/config-min.js"></script>
+<script type="text/javascript">
+    BUI.use(['common/search','common/page'],function (Search) {
+
+        var enumObj = {"0":"-","1":"超级管理员","2":"车间管理员", "3":"车队管理员","4":"普通用户"},
+                columns = [
+                    {title:'用户名',dataIndex:'userName',width:'10%'},
+                    {title:'关联车间',dataIndex:'chejianName',width:'10%'},
+                    {title:'关联车队',dataIndex:'cheduiName',width:'10%'},
+                    {title:'关联员工',dataIndex:'workerName',width:'10%'},
+                    {title:'角色类型',dataIndex:'role',width:'10%',renderer:BUI.Grid.Format.enumRenderer(enumObj)},
+                    {title:'创建时间',dataIndex:'createTime',width:'20%',renderer:BUI.Grid.Format.datetimeRenderer},
+                    {title:'操作',dataIndex:'',width:'30%',renderer : function(value,obj){
+                        var  editStr =  Search.createLink({ //链接使用 此方式
+                                    id : 'edit' + obj.id,
+                                    title : '编辑用户信息',
+                                    text : '编辑',
+                                    href : '../ft_user/userEdit.html?id='+obj.id
+                                }),
+                                delStr = '<span class="grid-command btn-del" title="删除车队信息">删除</span>';//页面操作不需要使用Search.createLink
+                        return editStr +'&nbsp;&nbsp'+ delStr;
+                    }}
+                ],
+                store = Search.createStore('../../user/selectByParams'),
+                gridCfg = Search.createGridCfg(columns,{
+                    emptyDataTpl : '<div class="centered"><h2>无记录</h2></div>',
+                    tbar : {
+                        items : [
+                            {text : '新建',btnCls : 'button button-success',handler:function(){window.location.href="cheduiEdit.html"; }},
+                            {text : '删除',btnCls : 'button button-danger',handler : delFunction},
+                            {text : '重置密码',btnCls : 'button button-danger',handler : resetPwdFunction}
+                        ]
+                    },
+                    plugins : [BUI.Grid.Plugins.CheckSelection,BUI.Grid.Plugins.RowNumber] // 插件形式引入多选表格
+                });
+
+        var  search = new Search({
+                    store : store,
+                    gridCfg : gridCfg
+                }),
+                grid = search.get('grid');
+        //删除操作
+        function delFunction(){
+            var selections = grid.getSelection();
+            delItems(selections);
+        }
+
+        //重置密码操作
+        function resetPwdFunction(){
+            var selections = grid.getSelection();
+            resetPwdItems(selections);
+        }
+
+        function resetPwdItems(items){
+            var ids = [];
+            BUI.each(items,function(item){
+                ids.push(item.id);
+            });
+
+            if(ids.length){
+                BUI.Message.Confirm('确认要重置选中的记录密码？',function(){
+                    $.ajax({
+                        url : '../../user/resetPwd',
+                        dataType : 'json',
+                        traditional: true,
+                        data : {ids : ids},
+                        success : function(data){
+                            if(data.successed){ //成功
+                                BUI.Message.Alert('重置成功');
+                                search.load();
+                            }else{ //失败
+                                BUI.Message.Alert(data.msg);
+                            }
+                        }
+                    });
+                },'question');
+            }
+        }
+
+        function delItems(items){
+            var ids = [];
+            BUI.each(items,function(item){
+                ids.push(item.id);
+            });
+
+            if(ids.length){
+                BUI.Message.Confirm('确认要删除选中的记录么？',function(){
+                    $.ajax({
+                        url : '../../user/delete',
+                        dataType : 'json',
+                        traditional: true,
+                        data : {ids : ids},
+                        success : function(data){
+                            if(data.successed){ //删除成功
+                                search.load();
+                            }else{ //删除失败
+                                BUI.Message.Alert('删除失败！');
+                            }
+                        }
+                    });
+                },'question');
+            }
+        }
+
+        //监听事件，删除一条记录
+        grid.on('cellclick',function(ev){
+            var sender = $(ev.domTarget); //点击的Dom
+            if(sender.hasClass('btn-del')){
+                var record = ev.record;
+                delItems([record]);
+            }
+        });
+    });
+
+    BUI.use(['bui/select','bui/data'],function(Select,Data){
+
+        var store = new Data.Store({
+                    url : '../common/selectRole',
+                    autoLoad : true
+                }),
+                select = new Select.Select({
+                    render:'#s1',
+                    valueField:'#userType',
+                    multipleSelect : false,
+                    store : store
+                });
+        select.render();
+
+    });
+
+</script>
+<!-- script end -->
+
+</body>
+</html>

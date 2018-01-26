@@ -1,0 +1,124 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title> 编辑车间信息</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link href="../assets/css/dpl-min.css" rel="stylesheet" type="text/css" />
+    <link href="../assets/css/bui-min.css" rel="stylesheet" type="text/css" />
+    <link href="../assets/css/page-min.css" rel="stylesheet" type="text/css" />   <!-- 下面的样式，仅是为了显示代码，而不应该在项目中使用-->
+    <link href="../assets/css/prettify.css" rel="stylesheet" type="text/css" />
+    <style type="text/css">
+        code {
+            padding: 0px 4px;
+            color: #d14;
+            background-color: #f7f7f9;
+            border: 1px solid #e1e1e8;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <form id ="J_Form" class="form-horizontal" action="../../chejian/update">
+        <h3>基本信息</h3>
+        <input name="id" id="id" type="text" style="visibility: hidden" class="control-text">
+        <div class="row">
+            <div class="control-group span12">
+                <label class="control-label"><s>*</s>车间名称：</label>
+                <div class="controls">
+                    <input name="workshopName" id="workshopName_id" type="text" class="control-text" data-rules="{required:true}">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="control-group span24">
+                <label class="control-label">车间简介：</label>
+                <div class="controls control-row4">
+                    <textarea name="bfIntroduction" id="bfIntroduction_id" class="span8 span-width"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="control-group span24">
+                <label class="control-label">车间备注：</label>
+                <div class="controls control-row4">
+                    <textarea name="remarks" id="remarks_id" class="span8 span-width"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-actions offset3">
+                <button type="submit" class="button button-primary">保存</button>
+                <button type="reset" class="button">重置</button>
+            </div>
+        </div>
+    </form>
+
+    <script type="text/javascript" src="../assets/js/jquery-1.8.1.min.js"></script>
+    <script type="text/javascript" src="../assets/js/bui-min.js"></script>
+
+    <script type="text/javascript" src="../assets/js/config-min.js"></script>
+    <script type="text/javascript">
+        BUI.use('common/page');
+    </script>
+    <script type="text/javascript">
+
+        function GetQueryString(name){
+            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)","i");
+            var r = window.location.search.substr(1).match(reg);
+            if (r!=null) return (r[2]); return null;
+        }
+
+        BUI.use('bui/form',function (Form) {
+
+            var id=GetQueryString("id");
+            if(null!=id &&''!=id){
+                // alert(id);
+                $.ajax({
+                    url : '../../chejian/detail',
+                    dataType : 'json',
+                    data : {id : id},
+                    success : function(data){
+                        if(data.successed){ //获取数据成功
+
+                            var wo=data.result;
+                            $('#id').val(id);
+                            $('#workshopName_id').val(wo.chejianName);
+                            $('#bfIntroduction_id').val(wo.chejianIntroduction);
+                            $('#remarks_id').val(wo.chejianInfo);
+
+                        }else{ //删除失败
+                            BUI.Message.Alert('数据获取失败！');
+                        }
+                    }
+                });
+            }
+
+
+            var form = new Form.HForm({
+                srcNode : '#J_Form'
+            }).render();
+
+        });
+    </script>
+
+    <script type="text/javascript">
+        BUI.use('bui/form',function(Form){
+            new Form.HForm({
+                srcNode : '#J_Form',
+                submitType : 'ajax',
+                callback : function(data){
+                    if(data.successed){
+                        BUI.Message.Alert('操作成功！');
+                    }
+                    else{
+                        BUI.Message.Alert(data.msg);
+                    }
+
+                }
+            }).render();
+        });
+    </script>
+</div>
+    </body>
+</html>

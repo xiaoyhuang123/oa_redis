@@ -1,0 +1,321 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>查询员工信息</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link href="../assets/css/dpl-min.css" rel="stylesheet" type="text/css" />
+    <link href="../assets/css/bui-min.css" rel="stylesheet" type="text/css" />
+    <link href="../assets/css/page-min.css" rel="stylesheet" type="text/css" />
+
+    <link href="../assets/bui/bui/1.1.21/css/bs3/dpl.css" rel="stylesheet"/>
+    <link href="../assets/bui/bui/1.1.21/css/bs3/bui.css" rel="stylesheet"/>
+
+</head>
+<body>
+
+<div >
+
+    <form id="J_Form"  class="form-horizontal" action="../task/countAll">
+        <hr/>
+        <div class="row span24">
+            <div class="control-group span24">
+                <label class="control-label">
+                    <s></s>所属信息：</label>
+                <div class="controls">
+                    <div id="cj">
+                        <input type="hidden" id="chejianId" value="" name="chejianId">
+                    </div>
+                </div>
+                <div class="controls">
+                    <div id="cd">
+                        <input type="hidden" id="cheduiId" value="" name="cheduiId">
+                    </div>
+                </div>
+                <div class="controls">
+                    <div id="wk">
+                        <input type="hidden" id="workerId" value="" name="workerId">
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="row span24">
+            <div class="control-group span12">
+                <label class="control-label"><s>*</s>查询区间：</label>
+                <div class="controls">
+                    <input type="text" class=" calendar"  id="startDate" name="startDate"><span> - </span><input id="endDate" name="endDate" type="text"  class=" calendar">
+                </div>
+            </div>
+            <button  type="submit" id="btnSearch" class="button button-primary">搜索</button>
+        </div>
+        <hr/>
+        <table style="width: 100%">
+            <tr style="width: 100%">
+                <td style="width: 50%">
+
+                    <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+                    <div id="main" style="height:400px"></div>
+                </td>
+                <td style="width: 50%">
+
+                    <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+                    <div id="main1" style="height:400px"></div>
+                </td>
+
+            </tr>
+        </table>
+    </form>
+</div>
+
+<script type="text/javascript" src="../assets/js/acharts.js"></script>
+<script src="../assets/bui/seajs/2.3.0/sea.js"></script>
+<script src="../assets/bui/bui/1.1.21/config.js"></script>
+<script type="text/javascript" src="../assets/js/jquery-1.8.1.min.js"></script>
+<script type="text/javascript" src="../assets/js/bui-min.js"></script>
+<script type="text/javascript" src="../assets/js/config-min.js"></script>
+
+<script type="text/javascript" src="../assets/js/echarts.common.min.js"></script>
+<script type="text/javascript">
+    BUI.use('bui/form',function(Form) {
+        new Form.HForm({
+            srcNode: '#J_Form',
+            submitType: 'ajax',
+            async: true,
+            callback: function (result) {
+
+                var totals=0;better=0; good=0;  middle=0;  terriable=0;complete=0;notComplete=0;midComplete=0;
+                totals = result.totals;
+                complete= result.complete;
+                midComplete = result.midComplete;
+                notComplete=result.notComplete;
+                better= result.better;
+                good=result.good;
+                middle=result.middle;
+                terriable= result.terriable;
+                if(totals<1){
+                    $('#main').hide();
+                    $('#main1').hide();
+                    BUI.Message.Alert('无任务记录!');
+                }
+                else
+                {
+                    $('#main').show();
+                    var option = {
+                        title : {
+                            text: '完成情况一览',
+                            // subtext: '纯属虚构',
+                            x:'center'
+                        },
+                        tooltip : {
+                            trigger: 'item',
+                            formatter: "{a} <br/>{b} : {c} ({d}%)"
+                        },
+                        legend: {
+                            orient : 'vertical',
+                            x : 'left',
+                            data:['已完成','未完成','已反馈，待评分']
+                        },
+                        toolbox: {
+                            show : true,
+                            feature : {
+                                mark : {show: true},
+                                dataView : {show: true, readOnly: false},
+                                magicType : {
+                                    show: true,
+                                    type: ['pie', 'funnel'],
+                                    option: {
+                                        funnel: {
+                                            x: '25%',
+                                            width: '50%',
+                                            funnelAlign: 'left',
+                                            max: 1548
+                                        }
+                                    }
+                                },
+                                restore : {show: true},
+                                saveAsImage : {show: true}
+                            }
+                        },
+                        calculable : true,
+                        series : [
+                            {
+                                name:'类型',
+                                type:'pie',
+                                radius : '55%',
+                                center: ['50%', '60%'],
+                                data:[
+                                    {value:complete, name:'已完成'},
+                                    {value:notComplete, name:'未完成'},
+                                    {value:midComplete, name:'其他'}
+                                ]
+                            }
+                        ]
+                    };
+                    //初始化echarts实例
+                    var myChart = echarts.init(document.getElementById('main'));
+                    //使用制定的配置项和数据显示图表
+                    myChart.setOption(option);
+
+                    if(complete<1){
+                        $('#main1').hide();
+                        BUI.Message.Alert('无成绩记录!');
+                    }
+                    else{
+                        $('#main1').show();
+                        var option1 = {
+                            title : {
+                                text: '成绩汇总',
+                                //subtext: '纯属虚构',
+                                x:'center'
+                            },
+                            tooltip : {
+                                trigger: 'item',
+                                formatter: "{a} <br/>{b} : {c} ({d}%)"
+                            },
+                            legend: {
+                                orient : 'vertical',
+                                x : 'left',
+                                data:['优','良','中','差']
+                            },
+                            toolbox: {
+                                show : true,
+                                feature : {
+                                    mark : {show: true},
+                                    dataView : {show: true, readOnly: false},
+                                    magicType : {
+                                        show: true,
+                                        type: ['pie', 'funnel'],
+                                        option: {
+                                            funnel: {
+                                                x: '25%',
+                                                width: '50%',
+                                                funnelAlign: 'left',
+                                                max: 1548
+                                            }
+                                        }
+                                    },
+                                    restore : {show: true},
+                                    saveAsImage : {show: true}
+                                }
+                            },
+                            calculable : true,
+                            series : [
+                                {
+                                    name:'成绩',
+                                    type:'pie',
+                                    radius : '55%',
+                                    center: ['50%', '60%'],
+                                    data:[
+                                        {value:better, name:'优'},
+                                        {value:good, name:'良'},
+                                        {value:middle, name:'中'},
+                                        {value:terriable, name:'差'}
+                                    ]
+                                }
+                            ]
+                        };
+
+                        var myChart1 = echarts.init(document.getElementById('main1'));
+                        //使用制定的配置项和数据显示图表
+                        myChart1.setOption(option1);
+                    }
+                }
+            }
+        }).render();
+
+    });
+    BUI.use(['bui/select','bui/data'],function(Select,Data){
+
+        var store = new Data.Store({
+                    url : '../common/selectChejian',
+                    autoLoad : true
+                }),
+                select = new Select.Select({
+                    render:'#cj',
+                    valueField:'#chejianId',
+                    multipleSelect : false,
+                    store : store
+                });
+        select.render();
+
+        $('#chejianId').on('change', function(ev){
+            var select =$('#chejianId');
+            var cjid=select.val();
+
+            $('#cd').empty();
+            $('#wk').empty();
+            $("#cd").append(' <input type="hidden" id="cheduiId"  name="cheduiId" value="">');
+            if(select.val()==""){
+                $('#cd').empty();
+                $('#wk').empty();
+                $("#cd").append(' <input type="hidden" id="cheduiId"  name="cheduiId">');
+            }
+            else{
+
+                var store = new Data.Store({
+                            url : '../common/selectChedui?chejianId='+cjid,
+                            autoLoad : true
+                        }),
+                        select = new Select.Select({
+                            render:'#cd',
+                            valueField:'#cheduiId',
+                            multipleSelect : false,
+                            store : store
+                        });
+                select.render();
+
+                var cdSelect =$('#cheduiId');
+                var cdid=cdSelect.val();
+                var store1 = new Data.Store({
+                            url : '../worker/select?chejianId='+cjid+'&cheduiId='+cdid,
+                            autoLoad : true
+                        }),
+                        select = new Select.Select({
+                            render:'#wk',
+                            valueField:'#workerId',
+                            multipleSelect : false,
+                            store : store1
+                        });
+                select.render();
+
+
+
+                $('#cheduiId').on('change', function(ev){
+                    var cjSelect =$('#chejianId');
+                    var cdSelect =$('#cheduiId');
+                    var cjid=cjSelect.val();
+
+                    var cdid=cdSelect.val();
+
+                    $('#wk').empty();
+                    $("#wk").append(' <input type="hidden" id="workerId"  name="workerId">');
+                    /*if(cdSelect.val()==""){
+                     $('#wk').empty();
+                     $("#wk").append(' <input type="hidden" id="workerId"  name="workerId">');
+                     }
+                     else*/{
+
+                        var store = new Data.Store({
+                                    url : '../worker/select?chejianId='+cjid+'&cheduiId='+cdid,
+                                    autoLoad : true
+                                }),
+                                select = new Select.Select({
+                                    render:'#wk',
+                                    valueField:'#workerId',
+                                    multipleSelect : false,
+                                    store : store
+                                });
+                        select.render();
+                    }
+                });
+
+            }
+        });
+
+    });
+
+    $("#btnSearch").click();
+
+</script>
+</body>
+</html>

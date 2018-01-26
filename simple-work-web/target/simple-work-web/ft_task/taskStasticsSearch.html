@@ -1,0 +1,210 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>查询员工信息</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link href="../assets/css/dpl-min.css" rel="stylesheet" type="text/css" />
+    <link href="../assets/css/bui-min.css" rel="stylesheet" type="text/css" />
+    <link href="../assets/css/page-min.css" rel="stylesheet" type="text/css" />
+
+    <link href="../assets/bui/bui/1.1.21/css/bs3/dpl.css" rel="stylesheet"/>
+    <link href="../assets/bui/bui/1.1.21/css/bs3/bui.css" rel="stylesheet"/>
+</head>
+<body>
+
+<div >
+    <form id="searchForm" class="form-horizontal">
+        <hr/>
+        <div class="row ">
+            <div class="control-group span12">
+                <label class="control-label"><s>*</s>汇总维度：</label>
+                <div class="controls">
+                    <select name="staticsType" class="input-normal">
+                        <option value="1">按车间汇总</option>
+                        <option value="2">按车队汇总</option>
+                        <option value="3">按员工汇总</option>
+                        <option value="4">按任务类型汇总</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="control-group span24">
+                <label class="control-label">
+                    <s></s>所属信息：</label>
+                <div class="controls">
+                    <div id="cj">
+                        <input type="hidden" id="chejianId" value="" name="chejianId">
+                    </div>
+                </div>
+                <div class="controls">
+                    <div id="cd">
+                        <input type="hidden" id="cheduiId" value="" name="cheduiId">
+                    </div>
+                </div>
+                <div class="controls">
+                    <div id="wk">
+                        <input type="hidden" id="workerId" value="" name="workerId">
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="row ">
+            <div class="control-group span12">
+                <label class="control-label"><s>*</s>查询区间：</label>
+                <div class="controls">
+                    <input type="text" class=" calendar"  id="startDate" name="startDate"><span> - </span><input id="endDate" name="endDate" type="text"  class=" calendar">
+                </div>
+            </div>
+            <button  type="button" id="btnSearch" class="button button-primary">搜索</button>
+        </div>
+        <hr/>
+    </form>
+
+
+
+</div>
+<div style="width: 100%; text-align: center">
+
+    <div class="detail-row">
+        <div class="search-grid-container">
+            <div id="grid">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" src="../assets/js/acharts.js"></script>
+<script src="../assets/bui/seajs/2.3.0/sea.js"></script>
+<script src="../assets/bui/bui/1.1.21/config.js"></script>
+<script type="text/javascript" src="../assets/js/jquery-1.8.1.min.js"></script>
+<script type="text/javascript" src="../assets/js/bui-min.js"></script>
+<script type="text/javascript" src="../assets/js/config-min.js"></script>
+
+<script type="text/javascript">
+    BUI.use(['common/search','common/page'],function (Search) {
+
+        var  columns = [
+                    {title:'对象名称',dataIndex:'title',width:'20%',elCls : 'center'},
+                    {title:'任务数量',dataIndex:'taskTotal',width:'20%',elCls : 'center'},
+                    {title:'已完成数量',dataIndex:'completeTotal',width:'10%',  elCls : 'center'},
+                    {title:'完成百分比',dataIndex:'completePercentage',width:'10%',elCls : 'center'},
+                    {title:'优',dataIndex:'better',width:'10%',elCls : 'center'},
+                    {title:'良',dataIndex:'good',width:'10%',elCls : 'center'},
+                    {title:'中',dataIndex:'middle',width:'10%',elCls : 'center'},
+                    {title:'差',dataIndex:'terriable',width:'10%',elCls : 'center'}
+                ],
+                store = Search.createStore('../../task/stasticsTaskByParams?ignoreParentIdNull=1'),
+                gridCfg = Search.createGridCfg(columns,{
+                    emptyDataTpl : '<div class="centered"><h2>无记录</h2></div>',
+                    itemStatusFields : { //设置数据跟状态的对应关系
+                        disabled : 'disable',
+                        read1 : 'completeFlag',//如果readed : true,则附加 bui-grid-row-read 样式
+                        read : 'notCompleteFlag' //如果readed : true,则附加 bui-grid-row-read 样式
+                    },
+                    plugins : [BUI.Grid.Plugins.CheckSelection,BUI.Grid.Plugins.RowNumber] // 插件形式引入多选表格
+                });
+
+        var  search = new Search({
+                    store : store,
+                    gridCfg : gridCfg
+                }),
+                grid = search.get('grid');
+    });
+
+    BUI.use(['bui/select','bui/data'],function(Select,Data){
+
+        var store = new Data.Store({
+                    url : '../common/selectChejian',
+                    autoLoad : true
+                }),
+                select = new Select.Select({
+                    render:'#cj',
+                    valueField:'#chejianId',
+                    multipleSelect : false,
+                    store : store
+                });
+        select.render();
+
+        $('#chejianId').on('change', function(ev){
+            var select =$('#chejianId');
+            var cjid=select.val();
+
+            $('#cd').empty();
+            $('#wk').empty();
+            $("#cd").append(' <input type="hidden" id="cheduiId"  name="cheduiId" value="">');
+            if(select.val()==""){
+                $('#cd').empty();
+                $('#wk').empty();
+                $("#cd").append(' <input type="hidden" id="cheduiId"  name="cheduiId">');
+            }
+            else
+            {
+
+                var store = new Data.Store({
+                            url : '../common/selectChedui?chejianId='+cjid,
+                            autoLoad : true
+                        }),
+                        select = new Select.Select({
+                            render:'#cd',
+                            valueField:'#cheduiId',
+                            multipleSelect : false,
+                            store : store
+                        });
+                select.render();
+
+                var cdSelect =$('#cheduiId');
+                var cdid=cdSelect.val();
+                var store1 = new Data.Store({
+                            url : '../worker/select?chejianId='+cjid+'&cheduiId='+cdid,
+                            autoLoad : true
+                        }),
+                        select = new Select.Select({
+                            render:'#wk',
+                            valueField:'#workerId',
+                            multipleSelect : false,
+                            store : store1
+                        });
+                select.render();
+
+
+
+                $('#cheduiId').on('change', function(ev){
+                    var cjSelect =$('#chejianId');
+                    var cdSelect =$('#cheduiId');
+                    var cjid=cjSelect.val();
+
+                    var cdid=cdSelect.val();
+
+                    $('#wk').empty();
+                    $("#wk").append(' <input type="hidden" id="workerId"  name="workerId">');
+                    /*if(cdSelect.val()==""){
+                     $('#wk').empty();
+                     $("#wk").append(' <input type="hidden" id="workerId"  name="workerId">');
+                     }
+                     else*/
+                    {
+
+                        var store = new Data.Store({
+                                    url : '../worker/select?chejianId='+cjid+'&cheduiId='+cdid,
+                                    autoLoad : true
+                                }),
+                                select = new Select.Select({
+                                    render:'#wk',
+                                    valueField:'#workerId',
+                                    multipleSelect : false,
+                                    store : store
+                                });
+                        select.render();
+                    }
+                });
+
+            }
+        });
+
+    });
+</script>
+
+</body>
+</html>

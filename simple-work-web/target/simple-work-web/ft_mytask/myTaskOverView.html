@@ -1,0 +1,276 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>查询员工信息</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link href="../assets/css/dpl-min.css" rel="stylesheet" type="text/css" />
+    <link href="../assets/css/bui-min.css" rel="stylesheet" type="text/css" />
+    <link href="../assets/css/page-min.css" rel="stylesheet" type="text/css" />
+
+    <link href="../assets/bui/bui/1.1.21/css/bs3/dpl.css" rel="stylesheet"/>
+    <link href="../assets/bui/bui/1.1.21/css/bs3/bui.css" rel="stylesheet"/>
+</head>
+<body>
+
+<div >
+
+    <form id="searchForm" class="form-horizontal">
+        <hr/>
+        <div class="row ">
+            <div class="control-group span12">
+                <label class="control-label"><s>*</s>查询区间：</label>
+                <div class="controls">
+                    <input type="text" class=" calendar" data-rules="{required:true}" id="startDate" name="startDate"><span> - </span><input id="endDate" name="endDate" type="text" data-rules="{required:true}" class=" calendar">
+                </div>
+            </div>
+            <button  type="button" id="btnSearch" class="button button-primary">搜索</button>
+
+        </div>
+        <hr/>
+    </form>
+
+    <table style="width: 100%">
+        <tr>
+            <td style="width: 50%;text-align: center">
+                <h4>完成情况一览</h4>
+            </td>
+            <td style="width: 50%;text-align: center">
+                <h4>成绩汇总</h4>
+            </td></tr>
+        <tr style="width: 100%">
+            <td style="width: 50%">
+                <div class="detail-section">
+                    <div id="canvas">
+                    </div>
+                </div>
+            </td>
+            <td style="width: 50%">
+                <div class="detail-section">
+                    <div id="canvas1">
+                    </div>
+                </div>
+            </td>
+
+        </tr>
+    </table>
+
+</div>
+
+<script type="text/javascript" src="../assets/js/acharts.js"></script>
+<script src="../assets/bui/seajs/2.3.0/sea.js"></script>
+<script src="../assets/bui/bui/1.1.21/config.js"></script>
+<script type="text/javascript" src="../assets/js/jquery-1.8.1.min.js"></script>
+<script type="text/javascript" src="../assets/js/bui-min.js"></script>
+<script type="text/javascript" src="../assets/js/config-min.js"></script>
+
+<script type="text/javascript">
+    BUI.use(['common/search','common/page'],function (Search) {
+
+        var  columns = [
+                    {title:'对象名称',dataIndex:'title',width:'20%',elCls : 'center'},
+                    {title:'任务数量',dataIndex:'taskTotal',width:'20%',elCls : 'center'},
+                    {title:'已完成数量',dataIndex:'completeTotal',width:'10%',  elCls : 'center'},
+                    {title:'完成百分比',dataIndex:'completePercentage',width:'10%',elCls : 'center'},
+                    {title:'优',dataIndex:'better',width:'10%',elCls : 'center'},
+                    {title:'良',dataIndex:'good',width:'10%',elCls : 'center'},
+                    {title:'中',dataIndex:'middle',width:'10%',elCls : 'center'},
+                    {title:'差',dataIndex:'terriable',width:'10%',elCls : 'center'}
+                ],
+                store = Search.createStore('../../task/stasticsTaskByParams'),
+                gridCfg = Search.createGridCfg(columns,{
+                    emptyDataTpl : '<div class="centered"><h2>无记录</h2></div>',
+                    itemStatusFields : { //设置数据跟状态的对应关系
+                        disabled : 'disable',
+                        read1 : 'completeFlag',//如果readed : true,则附加 bui-grid-row-read 样式
+                        read : 'notCompleteFlag' //如果readed : true,则附加 bui-grid-row-read 样式
+                    },
+                    plugins : [BUI.Grid.Plugins.CheckSelection,BUI.Grid.Plugins.RowNumber] // 插件形式引入多选表格
+                });
+
+        var  search = new Search({
+                    store : store,
+                    gridCfg : gridCfg
+                }),
+                grid = search.get('grid');
+    });
+</script>
+
+<script type="text/javascript">
+    var complete=0; notComplete=0; id2=0;id3=0;id4=0;
+    $(document).ready(function () {
+                $.ajax({
+                    type: "POST",
+                    url: "../task/countAll?type=1",
+                    dataType: "json",
+                    async:true,
+                    success: function (result) {   //
+                        this.complete= result.complete;
+                        this.notComplete=result.notComplete;
+                        function1();
+                    }
+                });
+                function2();
+            }
+
+    );
+    function function2() {
+        //alert('数据错误');
+    }
+    function function1() {
+
+        var chart = new AChart({
+            id : 'canvas',
+            theme : Chart.Theme.Smooth1,
+            width : 500,
+            height : 300,
+            title : {
+                text : ''
+            },
+            legend : null ,//不显示图例
+            seriesOptions : { //设置多个序列共同的属性
+                pieCfg : {
+                    allowPointSelect : true,
+                    labels : {
+                        distance : 40,
+                        label : {
+                            //文本信息可以在此配置
+                        },
+                        renderer : function(value,item){ //格式化文本
+                            return value + ' ' + (item.point.percent * 100).toFixed(2)  + '%';
+                        }
+                    }
+                }
+            },
+            tooltip : {
+                pointRenderer : function(point){
+                    return (point.percent * 100).toFixed(2)+ '%';
+                }
+            },
+            series : [{
+                type: 'pie',
+                name: 'Browser share',
+                events : {
+                    itemclick : function (ev) {
+                        var point = ev.point
+                        //item = ev.item, //点击的项
+                        console.log(point); //执行一系列操作
+                    },
+                    //选中事件
+                    itemselected : function(ev){
+                        //console.log(ev.point.xValue + ' selected');
+                        window.location.href="ft_task/taskSearch.html";
+                    },
+                    //取消选中
+                    itemunselected : function(ev){
+                        console.log(ev.point.xValue + ' unselected');
+                    }
+                },
+                data: [
+                    ['未完成',   this.notComplete],
+                    ['已完成',    this.complete],
+                    ['待签收',       this.id2],
+                    {
+                        name: '待签收',
+                        y: 12.8,
+                        sliced: true/*,
+                     selected: true*/
+                    },
+                    ['超期未完成',     this.id3],
+                    ['超期已完成',   this.id4]
+                ]
+            }]
+        });
+
+        chart.render();
+
+    }
+</script>
+<!-- script end -->
+
+<script type="text/javascript">
+    var better=0; good=0;  middle=0;  terriable=0;
+    $(document).ready(function () {
+                $.ajax({
+                    type: "POST",
+                    url: "../task/countAll?type=2",
+                    dataType: "json",
+                    async:true,
+                    success: function (result) {   //
+                        better= result.better;
+                        good=result.good;
+                        middle=result.middle;
+                        terriable= result.terriable;
+                        function11();
+                    }
+                });
+                function22();
+            }
+
+    );
+    function function22() {
+        //alert('数据错误');
+    }
+    function function11() {
+
+        var chart = new AChart({
+            id : 'canvas1',
+            theme : Chart.Theme.Smooth1,
+            width : 500,
+            height : 300,
+            title : {
+                text : ''
+            },
+            legend : null ,//不显示图例
+            seriesOptions : { //设置多个序列共同的属性
+                pieCfg : {
+                    allowPointSelect : true,
+                    labels : {
+                        distance : 40,
+                        label : {
+                            //文本信息可以在此配置
+                        },
+                        renderer : function(value,item){ //格式化文本
+                            return value + ' ' + (item.point.percent * 100).toFixed(2)  + '%';
+                        }
+                    }
+                }
+            },
+            tooltip : {
+                pointRenderer : function(point){
+                    return (point.percent * 100).toFixed(2)+ '%';
+                }
+            },
+            series : [{
+                type: 'pie',
+                name: 'Browser share',
+                events : {
+                    itemclick : function (ev) {
+                        var point = ev.point
+                        //item = ev.item, //点击的项
+                        console.log(point); //执行一系列操作
+                    },
+                    //选中事件
+                    itemselected : function(ev){
+                        //console.log(ev.point.xValue + ' selected');
+                        window.location.href="ft_task/taskSearch.html";
+                    },
+                    //取消选中
+                    itemunselected : function(ev){
+                        console.log(ev.point.xValue + ' unselected');
+                    }
+                },
+                data: [
+                    ['优',   this.better],
+                    ['良',       this.good],
+                    ['中',    this.middle],
+                    ['差',     this.terriable],
+                ]
+            }]
+        });
+
+        chart.render();
+
+    }
+</script>
+</body>
+</html>
